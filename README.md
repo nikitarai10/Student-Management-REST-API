@@ -1,23 +1,15 @@
 #Student Management REST API
-A RESTful API built with Spring Boot that performs CRUD operations for student records. The project follows a layered architecture using 
-Controller, Service, Repository, Entity, and DTO layers.
+A RESTful API built with Spring Boot in which Admin can register, create courses, register students, assign and unassign courses to students.
 
 ## Features
-- Create a student
-- Retrieve all students
-- Retrieve a student by ID
-- Update student details
-- Partially update a student
-- Delete a student
-- Input validation
-- Exception handling
-- DTO mapping using ModelMapper
+- Admin can register/login
+- Admin can Register Courses,Students
+- Admin can assign courses to students.
+- Students can update their profile details and can also leave the course assigned to them.
 
 ## Technologies Used
 - Java 21
 - Spring Boot
-- Spring Web
-- Spring Data JPA
 - Hibernate
 - PostgreSQL
 - Maven
@@ -28,28 +20,6 @@ Controller, Service, Repository, Entity, and DTO layers.
 ## Tools Used
 - IntelliJ IDEA
 - DBeaver
-- Postman
-  
-## Architecture
-Client
-↓
-Controller
-↓
-Service
-↓
-Repository
-↓
-Database
-
-## API Endpoints
-| Method | Endpoint | Description |
-|---------|----------|-------------|
-| GET | /api/students | Get all students |
-| GET | /api/students/{id} | Get student by ID |
-| POST | /api/students | Create student |
-| PUT | /api/students/{id} | Update student |
-| PATCH | /api/students/{id} | Partially update student |
-| DELETE | /api/students/{id} | Delete student |
 
 ## Design Pattern
 This project follows the layered architecture:
@@ -59,6 +29,7 @@ This project follows the layered architecture:
 - Repository Layer
 - Entity Layer
 - DTO Layer
+- Exceptions Layer
 
 ## Future Improvements
 - JWT Authentication
@@ -67,7 +38,6 @@ This project follows the layered architecture:
 - Unit Testing
 - Docker
 - Pagination & Sorting
-- Global Exception Handling
 - Logging
 
 ## Author
