@@ -1,80 +1,74 @@
 package Spring.REST.API.Service.Impl;
 
-import Spring.REST.API.DTO.AddStudentRequestDTO;
-import Spring.REST.API.DTO.PatchStudentRequestDTO;
-import Spring.REST.API.DTO.StudentDTO;
-import Spring.REST.API.Entity.StudentEntity;
-import Spring.REST.API.Repository.StudentRepository;
+import java.util.List;
+import java.util.Optional;
+
 import Spring.REST.API.Service.StudentService;
-import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import Spring.REST.API.Entity.Course;
+import Spring.REST.API.Entity.Student;
+import Spring.REST.API.Exceptions.CourseException;
+import Spring.REST.API.Exceptions.StudentException;
+import Spring.REST.API.Repository.CourseDao;
+import Spring.REST.API.Repository.StudentDao;
 
 @Service
-@RequiredArgsConstructor
 public class StudentServiceImpl implements StudentService {
 
-    private final StudentRepository studentRepository;
-    private final ModelMapper modelMapper;
+    @Autowired
+    private StudentDao sd;
+
+    @Autowired
+    private CourseDao cd;
 
     @Override
-    public List<StudentDTO> getAllStudents() {
-        List<StudentEntity> students = studentRepository.findAll();
-        return students.stream().map(student -> modelMapper.map(student, StudentDTO.class)).toList();
+    public Student registerStudent(Student student) throws StudentException {
+        Student existingStudent= sd.findByMobileNumber(student.getMobileNumber());
+
+        if(existingStudent != null)
+            throw new StudentException(" Student already registered with this mobile number!");
+
+        return sd.save(student);
     }
 
     @Override
-    public StudentDTO getStudentById(Long id) {
-        StudentEntity student = studentRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Student not found with ID: " + id));
-        return modelMapper.map(student, StudentDTO.class);
-    }
+    public List<Student> getStudentByName(String name) throws StudentException {
+        List<Student> students = sd.findByStudentName(name);
 
-    @Override
-    public StudentDTO createNewStudent(AddStudentRequestDTO addStudentRequestDTO) {
-        StudentEntity newStudent = modelMapper.map(addStudentRequestDTO, StudentEntity.class);
-        StudentEntity student = studentRepository.save(newStudent);
-        return modelMapper.map(student, StudentDTO.class);
-    }
-
-    @Override
-    public void deleteStudentById(Long id) {
-        if(!studentRepository.existsById(id)) {
-            throw new IllegalArgumentException("Student does not exist by Id: " + id);
-        }
-        studentRepository.deleteById(id);
-    }
-
-    @Override
-    public StudentDTO updateStudent(Long id, AddStudentRequestDTO addStudentRequestDTO) {
-        StudentEntity student = studentRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Student not found with ID: " + id));
-        modelMapper.map(addStudentRequestDTO, student);
-        student =  studentRepository.save(student);
-        return modelMapper.map(student, StudentDTO.class);
-    }
-
-    @Override
-    public StudentDTO updatePartialStudent(Long id, PatchStudentRequestDTO patchStudentRequestDTO) {
-        StudentEntity student = studentRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Student not found with ID: " + id));
-        if (patchStudentRequestDTO.getName() != null) {
-            student.setName(patchStudentRequestDTO.getName());
+        if(students.size()>0) {
+            return students;
+        }else {
+            throw new StudentException("No student found with name : "+name) ;
         }
 
-        if (patchStudentRequestDTO.getEmail() != null) {
-            student.setEmail(patchStudentRequestDTO.getEmail());
-        }
-        StudentEntity saveStudent = studentRepository.save(student);
-        return modelMapper.map(saveStudent, StudentDTO.class);
     }
+
+    @Override
+    public Student updateStudentDetails(Student student) throws StudentException {
+        Student existingStudent= sd.findByMobileNumber(student.getMobileNumber());
+
+        if(existingStudent == null)
+            throw new StudentException(" Student doesn't exist with this mobile number!");
+
+        return sd.save(student);
+    }
+
+    @Override
+    public Course leaveTheCourse(Integer courseId, Integer studentId) throws CourseException, StudentException {
+        Optional<Student> student = sd.findById(studentId);
+        Optional<Course> course = cd.findById(courseId);
+        Course courseFetched = course.get();
+
+        if(student.isPresent()) {
+            Student std = student.get();
+            std.getCourses().remove(courseFetched);
+            sd.save(std);
+            courseFetched.getStudents().remove(std);
+        }
+
+        return cd.save(courseFetched);
+    }
+
 }
-
-
-
-
-
-
-
-
-
-

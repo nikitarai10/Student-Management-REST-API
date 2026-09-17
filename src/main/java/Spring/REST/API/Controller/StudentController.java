@@ -2,49 +2,65 @@ package Spring.REST.API.Controller;
 
 import java.util.List;
 
-import Spring.REST.API.DTO.AddStudentRequestDTO;
-import Spring.REST.API.DTO.PatchStudentRequestDTO;
-import Spring.REST.API.DTO.StudentDTO;
 import Spring.REST.API.Service.StudentService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import Spring.REST.API.Entity.Course;
+import Spring.REST.API.Entity.Student;
+import Spring.REST.API.Exceptions.CourseException;
+import Spring.REST.API.Exceptions.StudentException;
 
 @RestController
-@RequiredArgsConstructor
-@RequestMapping("/students")
+@RequestMapping("/student")
 public class StudentController {
-    private final StudentService studentService;
 
-    @GetMapping
-    public ResponseEntity<List<StudentDTO>> getAllStudent(){
-        return ResponseEntity.ok(studentService.getAllStudents());
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<StudentDTO> getStudentById(@PathVariable Long id){
-        return ResponseEntity.ok(studentService.getStudentById(id));
-    }
+    @Autowired
+    private StudentService ss;
 
     @PostMapping
-    public ResponseEntity<StudentDTO> createNewStudent(@RequestBody @Valid AddStudentRequestDTO addStudentRequestDTO){
-        return ResponseEntity.status(HttpStatus.CREATED).body(studentService.createNewStudent(addStudentRequestDTO));
+    public ResponseEntity<Student> registerStudentByAdmin(@Valid @RequestBody Student student) throws StudentException {
+
+        Student savedStudent = ss.registerStudent(student);
+
+        return new ResponseEntity<Student>(savedStudent, HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/{id}")
-    public void deleteStudent(@PathVariable Long id){
-        studentService.deleteStudentById(id);
+    @PutMapping
+    public ResponseEntity<Student> updateStudent(@Valid @RequestBody Student student) throws StudentException {
+
+        Student savedStudent = ss.updateStudentDetails(student);
+
+        return new ResponseEntity<Student>(savedStudent, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<StudentDTO> updateStudent(@PathVariable Long id, @RequestBody @Valid AddStudentRequestDTO addStudentRequestDTO){
-        return ResponseEntity.ok(studentService.updateStudent(id,addStudentRequestDTO));
+    @GetMapping("/students")
+    public ResponseEntity<List<Student>> getStudentsByNameHandler(@RequestParam("name") String name)
+            throws StudentException {
+
+        List<Student> studentsList = ss.getStudentByName(name);
+
+        return new ResponseEntity<List<Student>>(studentsList, HttpStatus.OK);
     }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<StudentDTO> updatePartialStudent(@PathVariable Long id, @RequestBody @Valid PatchStudentRequestDTO patchStudentRequestDTO){
-        return ResponseEntity.ok(studentService.updatePartialStudent(id,patchStudentRequestDTO));
+    @PostMapping("/{studentId}/{courseId}")
+    public ResponseEntity<Course> leaveCourseByStudent(@PathVariable Integer studentId, @PathVariable Integer courseId) throws CourseException, StudentException {
+
+        Course course = ss.leaveTheCourse(courseId, studentId);
+
+        return new ResponseEntity<Course>(course, HttpStatus.CREATED);
+
     }
+
 }

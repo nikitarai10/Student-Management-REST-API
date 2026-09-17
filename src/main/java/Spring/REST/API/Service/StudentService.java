@@ -2,21 +2,19 @@ package Spring.REST.API.Service;
 
 import java.util.List;
 
-import Spring.REST.API.DTO.AddStudentRequestDTO;
-import Spring.REST.API.DTO.PatchStudentRequestDTO;
-import Spring.REST.API.DTO.StudentDTO;
+import Spring.REST.API.Entity.Course;
+import Spring.REST.API.Entity.Student;
+import Spring.REST.API.Exceptions.CourseException;
+import Spring.REST.API.Exceptions.StudentException;
 
 public interface StudentService {
-    List<StudentDTO> getAllStudents();
 
-    StudentDTO getStudentById(Long id);
+    public Student registerStudent(Student student) throws StudentException;
 
-    StudentDTO createNewStudent(AddStudentRequestDTO addStudentRequestDTO);
+    public List<Student> getStudentByName(String name) throws StudentException;
 
-    void deleteStudentById(Long id);
+    public Student updateStudentDetails(Student student) throws StudentException;
 
-    StudentDTO updateStudent(Long id,AddStudentRequestDTO addStudentRequestDTO);
-
-    StudentDTO updatePartialStudent(Long id, PatchStudentRequestDTO patchStudentRequestDTO);
+    public Course leaveTheCourse(Integer courseId,Integer studentId) throws CourseException,StudentException;
 
 }
